@@ -78,14 +78,14 @@ exports.login = async (req, res, next) => {
     if (!isMatch) {
       return res.status(400).json({
         success: false,
-        message: "Invalid credentials"
+        message: "Invalid Password"
       });
     }
 
     if (user.role === "instructor" && user.status === "pending") {
       return res.status(403).json({
         success: false,
-        message: "Instructor account pending admin approval"
+        message: "Instructor account pending admin approvalrequired!"
       });
     }
 
