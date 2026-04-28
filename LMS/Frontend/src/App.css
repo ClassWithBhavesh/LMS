@@ -1,0 +1,59 @@
+@import "tailwindcss";
+/* ─── RESET ─────────────────────────────────────────────────────────────────── */
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* ─── BASE ───────────────────────────────────────────────────────────────────── */
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: #0a0a12;
+  color: #f1f0ff;
+  overflow-x: hidden;
+  line-height: 1.6;
+}
+
+/* ─── KEYFRAMES ──────────────────────────────────────────────────────────────── */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.4; }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50%       { transform: translateY(-30px) scale(1.05); }
+}
+
+@keyframes marquee {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+@keyframes shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ─── NAVBAR RESPONSIVE ──────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .nav-links-desktop,
+  .nav-actions-desktop {
+    display: none !important;
+  }
+
+  .hamburger-btn {
+    display: flex !important;
+  }
+}
