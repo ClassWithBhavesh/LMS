@@ -71,19 +71,3 @@ export default function App() {
   );
 }
 
-{
-  /* <main>
-  <Hero />
-  <TrustedBy />
-  <CoursesSection />
-  <WhySection />
-  <InstructorCTA />
-  <Testimonials />
-</main> */
-}
-// import Hero from "./components/Hero";
-// import TrustedBy from "./components/TrustedBy";
-// import CoursesSection from "./components/CoursesSection";
-// import WhySection from "./components/WhySection";
-// import InstructorCTA from "./components/InstructorCTA";
-// import Testimonials from "./components/Testimonials";

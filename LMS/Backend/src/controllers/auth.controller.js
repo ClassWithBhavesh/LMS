@@ -1,6 +1,8 @@
-const {registerVisiter, loginVisiter} = require("../services/auth.service.js");
+const {
+  registerVisiter,
+  loginVisiter,
+} = require("../services/auth.service.js");
 const asyncHandler = require("../middlewares/asyncHandler");
-
 
 // ================= REGISTER =================
 exports.register = async (req, res, next) => {
@@ -13,16 +15,15 @@ exports.register = async (req, res, next) => {
     res.cookie("refreshToken", result.refreshToken, {
       httpOnly: true,
       secure: false,
-      sameSite: "strict"
+      sameSite: "strict",
     });
 
     res.status(201).json({
       success: true,
       message: "User registered successfully",
       accessToken: result.accessToken,
-      visiter: result.visiter
+      visiter: result.visiter,
     });
-
   } catch (error) {
     console.log(error);
   }
@@ -33,43 +34,30 @@ exports.login = async (req, res, next) => {
   try {
     // console.log("login user credentials : ", req.body);
     const result = await loginVisiter(req.body);
-
+    console.log("backend se response of result - ", result);
+    if (result === "User Not Found") {
+      return res.status(404).json({
+        success: false,
+        message: "User Not Found",
+      });
+    }
     res.cookie("refreshToken", result.refreshToken, {
       httpOnly: true,
       secure: false,
-      sameSite: "strict"
+      sameSite: "strict",
     });
 
     res.status(200).json({
       success: true,
       message: "Login successful",
       accessToken: result.accessToken,
-      visiter: result.visiter
+      visiter: result.visiter,
     });
   } catch (error) {
     // next(error);
     console.log(error);
   }
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 // const User = require("../models/User.model");
 // const generateToken = require("../utils/generateToken");

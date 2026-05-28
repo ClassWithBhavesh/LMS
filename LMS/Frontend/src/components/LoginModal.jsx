@@ -3,6 +3,7 @@ import gsap from "gsap";
 import { useCallback } from "react";
 import { registerUser } from "../services/authService";
 import { loginUser } from "../services/authService";
+import { toast } from "react-toastify";
 
 function getStrength(pw) {
   if (!pw) return { level: 0, label: "", color: "" };
@@ -52,30 +53,33 @@ export default function LoginModal({ onClose, initialMode }) {
 
       localStorage.setItem("token", data.accessToken);
       localStorage.setItem("user", JSON.stringify(data.visiter));
-      
+
       handleCloseFunc();
     } catch (err) {
       console.error(err.response?.data || err.message);
     }
   };
-  
+
   const handleRegisterChange = (e) => {
     setRegisterData({
       ...registerData,
       [e.target.name]: e.target.value,
     });
   };
-  
+
   const handleLogin = async () => {
     try {
       const data = await loginUser(loginData);
-      
+      console.log(data);
       localStorage.setItem("token", data.accessToken);
       localStorage.setItem("user", JSON.stringify(data.visiter));
-      
+
+      toast.success(data.message || "Login Successful");
+
       handleCloseFunc();
     } catch (err) {
       console.error(err.response?.data || err.message);
+      toast.error(err.response?.data?.message || "Login Failed");
     }
   };
 

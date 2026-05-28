@@ -15,7 +15,7 @@ const registerVisiter = async (data) => {
     return {
         accessToken: generateAccessToken(visiter),
         refreshToken: generateRefreshToken(visiter),
-        visiter
+        visiter 
     };
 };
 
@@ -23,14 +23,15 @@ const loginVisiter = async ({ usermail, password }) => {
     const visiter = await Visiter.findOne({ usermail }).select("+password");
     console.log("user mail - ", usermail);
     if (!visiter) {
-        throw new Error("User not found");
+        return "User Not Found";
+        // throw new Error("User not found");
     }
 
     const isMatch = await visiter.comparePassword(password);
 
     if (!isMatch) {
         throw new Error("Invalid credentials");
-    }
+    }       
 
     const visiterObj = visiter.toObject();
     delete visiterObj.password;

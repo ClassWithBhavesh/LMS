@@ -3,6 +3,7 @@ import gsap from "gsap";
 import LoginModal from "../components/LoginModal";
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 export default function Navbar({ visible }) {
   const [user, setUser] = useState(null);
@@ -18,6 +19,9 @@ export default function Navbar({ visible }) {
     const storedUser = localStorage.getItem("user");
 
     if (storedUser) {
+      if (storedUser == undefined){
+        return;
+      }
       setUser(JSON.parse(storedUser));
     }
   }, [showAuthModal]);
@@ -71,6 +75,7 @@ export default function Navbar({ visible }) {
     navigate("/");
 
     setUser(null);
+    toast.info("Log Out Successfully");
   }
 
   return (
