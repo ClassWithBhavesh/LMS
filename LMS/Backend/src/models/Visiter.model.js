@@ -3,7 +3,7 @@ const bcrypt = require('bcrypt');
 
 
 
-const visiterSchema = new mongoose.Schema(
+const visitorSchema = new mongoose.Schema(
     {
         firstname: {
             type: String,
@@ -33,15 +33,15 @@ const visiterSchema = new mongoose.Schema(
 )
 
 
-visiterSchema.pre('save', async function (){
+visitorSchema.pre('save', async function (){
     if (!this.isModified("password")) return;
     
     this.password = await bcrypt.hash(this.password, 10);
 })
 
-visiterSchema.methods.comparePassword = async function (enteredPass){
+visitorSchema.methods.comparePassword = async function (enteredPass){
     return await bcrypt.compare(enteredPass, this.password);
 };
 
 
-module.exports = mongoose.model("Visiter", visiterSchema);
+module.exports = mongoose.model("Visitor", visitorSchema);

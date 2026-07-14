@@ -30,7 +30,7 @@ const loginVisiter = async ({ usermail, password }) => {
     const isMatch = await visiter.comparePassword(password);
 
     if (!isMatch) {
-        throw new Error("Invalid credentials");
+        throw new Error("Invalid Password");
     }       
 
     const visiterObj = visiter.toObject();

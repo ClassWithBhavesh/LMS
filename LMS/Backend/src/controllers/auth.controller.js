@@ -52,7 +52,7 @@ exports.login = async (req, res, next) => {
       message: "Login successful",
       accessToken: result.accessToken,
       visiter: result.visiter,
-    });
+    });   
   } catch (error) {
     // next(error);
     console.log(error);

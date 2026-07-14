@@ -1,11 +1,11 @@
-const User = require("../models/User.model");
+const Visiter = require("../models/Visiter.model");
 
 
 // ================= GET ALL USERS =================
 exports.getAllUsers = async (req, res, next) => {
   try {
 
-    const users = await User.find().select("-password");
+    const users = await Visiter.find().select("-password");
 
     res.status(200).json({
       success: true,
@@ -24,7 +24,7 @@ exports.getAllUsers = async (req, res, next) => {
 exports.getAllInstructors = async (req, res, next) => {
   try {
 
-    const instructors = await User.find({ role: "instructor" });
+    const instructors = await Visiter.find({ role: "instructor" });
 
     res.status(200).json({
       success: true,
@@ -43,7 +43,7 @@ exports.getAllInstructors = async (req, res, next) => {
 exports.getPendingInstructors = async (req, res, next) => {
   try {
 
-    const instructors = await User.find({
+    const instructors = await Visiter.find({
       role: "instructor",
       status: "pending"
     });
@@ -65,19 +65,19 @@ exports.getPendingInstructors = async (req, res, next) => {
 exports.approveInstructor = async (req, res, next) => {
   try {
 
-    const user = await User.findById(req.params.id);
+    const user = await Visiter.findById(req.params.id);
 
     if (!user) {
       return res.status(404).json({
         success: false,
-        message: "User not found"
+        message: "Visiter not found"
       });
     }
 
     if (user.role !== "instructor") {
       return res.status(400).json({
         success: false,
-        message: "User is not an instructor"
+        message: "Visiter is not an instructor"
       });
     }
 
@@ -101,12 +101,12 @@ exports.approveInstructor = async (req, res, next) => {
 exports.blockUser = async (req, res, next) => {
   try {
 
-    const user = await User.findById(req.params.id);
+    const user = await Visiter.findById(req.params.id);
 
     if (!user) {
       return res.status(404).json({
         success: false,
-        message: "User not found"
+        message: "Visiter not found"
       });
     }
 
@@ -116,7 +116,7 @@ exports.blockUser = async (req, res, next) => {
 
     res.status(200).json({
       success: true,
-      message: "User blocked successfully"
+      message: "Visiter blocked successfully"
     });
 
   } catch (error) {
@@ -130,12 +130,12 @@ exports.blockUser = async (req, res, next) => {
 exports.unblockUser = async (req, res, next) => {
   try {
 
-    const user = await User.findById(req.params.id);
+    const user = await Visiter.findById(req.params.id);
 
     if (!user) {
       return res.status(404).json({
         success: false,
-        message: "User not found"
+        message: "Visiter not found"
       });
     }
 
@@ -145,7 +145,7 @@ exports.unblockUser = async (req, res, next) => {
 
     res.status(200).json({
       success: true,
-      message: "User unblocked successfully"
+      message: "Visiter unblocked successfully"
     });
 
   } catch (error) {
