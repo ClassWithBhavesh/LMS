@@ -88,6 +88,8 @@ export default function LoginModal({ onClose, initialMode }) {
       ...loginData,
       [e.target.name]: e.target.value,
     });
+
+    console.log(loginData);
   };
 
   const handleCloseFunc = useCallback(

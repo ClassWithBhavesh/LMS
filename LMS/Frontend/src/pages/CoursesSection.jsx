@@ -6,6 +6,8 @@ import SkeletonCard from "../components/SkeletonCard";
 import { MOCK_COURSES } from "../data";
 import { COURSES } from "../assets/assets";
 import { useNavigate } from "react-router-dom";
+import { getAllCourses } from "../services/courseService";
+import { toast } from "react-toastify";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -27,13 +29,18 @@ export default function CoursesSection() {
   useEffect(() => {
     const fetchCourses = async () => {
       try {
-        const res  = await fetch("/api/v1/courses", { headers: { "Content-Type": "application/json" } });
-        if (!res.ok) throw new Error();
-        const data = await res.json();
-        const list = (data.courses || data.data || data).filter((c) => c.isPublished !== false);
-        setCourses(list.slice(0, 6));
-      } catch {
-          setCourses(COURSES)
+        setLoading(true);
+
+        const response = await getAllCourses();
+        if(response.success){
+          setCourses(response.courses.slice(0, response.courses.length));
+        }else{
+          setCourses([]);
+        }
+      } catch(error) {
+          console.error(error);
+          toast.error("Unable to Load Courses!");
+          setCourses([]);
       } finally {
         setLoading(false);
       }

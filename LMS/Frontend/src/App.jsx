@@ -11,6 +11,8 @@ import Partners from "./components/Partner";
 import Blog from "./components/Blog";
 import Contact from "./components/Contact";
 import CoursePage from "./pages/CoursePage";
+import CheckoutPage from "./pages/CheckoutPage";
+// import PaymentPage from "./pages/PaymentPage";
 
 export default function App() {
   const [loaded, setLoaded] = useState(false);
@@ -57,6 +59,7 @@ export default function App() {
               {/* Courses Page */}
               <Route path="courses" element={<CoursesSection />} />
               <Route path="course/:slug" element={<CoursePage />} />
+              <Route path="course/checkout/:courseId" element={<CheckoutPage />} />
               <Route path="about" element={<Aboutus />} />
               <Route path="Careers" element={<Career />} />
               <Route path="Partners" element={<Partners />} />

@@ -1,8 +1,9 @@
+const dotenv = require('dotenv');
+dotenv.config();
+
 const server = require("./src/config/app.js");
 const connDB = require("./src/config/db.js");
-const dotenv = require('dotenv');
 
-dotenv.config();
 
 connDB();
 

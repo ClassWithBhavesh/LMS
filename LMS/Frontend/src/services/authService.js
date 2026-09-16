@@ -8,6 +8,7 @@ export const registerUser = async (data) => {
 
 // LOGIN
 export const loginUser = async (data) => {
+  console.log(data);
   const res = await API.post("/auth/login", data);
   console.log(res);
   return res.data;

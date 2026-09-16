@@ -1,24 +1,46 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { courseData } from "../data/courseData";
+import { useNavigate } from "react-router-dom";
+import { checkAccess, getCourseBySlug } from "../services/courseService";
+import { toast } from "react-toastify";
 
 gsap.registerPlugin(ScrollTrigger);
 
 export default function CoursePage() {
   const { slug } = useParams();
+  const navigate = useNavigate();
 
-  const course = useMemo(
-    () => courseData.find((item) => item.slug === slug),
-    [slug],
-  );
+  const [course, setCourse] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   const [openModule, setOpenModule] = useState(0);
 
   const heroRef = useRef(null);
   const contentRef = useRef(null);
   const sidebarRef = useRef(null);
+
+useEffect(() => {
+  const fetchCourse = async () => {
+    try {
+      setLoading(true);
+
+      const response = await getCourseBySlug(slug);
+
+      if (response.success) {
+        const fetchedCourse = response.course;
+        setCourse({...fetchedCourse});
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchCourse();
+}, [slug]);
 
   useEffect(() => {
     if (!course) return;
@@ -56,6 +78,24 @@ export default function CoursePage() {
     return () => ctx.revert();
   }, [course]);
 
+  if (loading) {
+    return (
+      <div
+        style={{
+          minHeight: "100vh",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          background: "#0a0a12",
+          color: "#ffffff",
+          fontSize: "2rem",
+        }}
+      >
+        Loading Course...
+      </div>
+    );
+  }
+
   if (!course) {
     return (
       <div
@@ -79,6 +119,27 @@ export default function CoursePage() {
     borderRadius: 24,
     padding: "1.5rem",
     backdropFilter: "blur(20px)",
+  };
+
+  const handleStartLearning = async () => {
+    try {
+      console.log("course id - ", course._id);
+      const response = await checkAccess(course._id);
+      console.log("response from frontend -", response);
+
+      if (response.hasAccess) {
+        toast.success("Access Granted!");
+
+        navigate(`/lecture/${course._id}`);
+      } else {
+        toast.info("Purchase the course 1st");
+        navigate(`/payment/${course._id}`);
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error("Please purchase the course first!");
+      navigate(`/course/checkout/${course._id}`);
+    }
   };
 
   return (
@@ -164,22 +225,24 @@ export default function CoursePage() {
                 marginBottom: "2rem",
               }}
             >
-              {[course.students, `${course.rating} Rating`, course.duration].map(
-                (item) => (
-                  <div
-                    key={item}
-                    style={{
-                      padding: "0.9rem 1.2rem",
-                      background: "rgba(255,255,255,0.03)",
-                      borderRadius: 14,
-                      border: "1px solid rgba(255,255,255,0.08)",
-                      color: "#c4c1da",
-                    }}
-                  >
-                    {item}
-                  </div>
-                ),
-              )}
+              {[
+                `${course.students.toLocaleString()} +`,
+                `${course.rating} Rating`,
+                course.duration,
+              ].map((item) => (
+                <div
+                  key={item}
+                  style={{
+                    padding: "0.9rem 1.2rem",
+                    background: "rgba(255,255,255,0.03)",
+                    borderRadius: 14,
+                    border: "1px solid rgba(255,255,255,0.08)",
+                    color: "#c4c1da",
+                  }}
+                >
+                  {item}
+                </div>
+              ))}
             </div>
 
             <button
@@ -193,6 +256,7 @@ export default function CoursePage() {
                 fontWeight: 700,
                 fontSize: "0.95rem",
               }}
+              onClick={handleStartLearning}
             >
               Start Learning →
             </button>
@@ -237,7 +301,10 @@ export default function CoursePage() {
         {/* LEFT */}
         <div>
           {/* OVERVIEW */}
-          <div className="reveal-section" style={{ ...cardStyle, marginBottom: "2rem" }}>
+          <div
+            className="reveal-section"
+            style={{ ...cardStyle, marginBottom: "2rem" }}
+          >
             <h2 style={{ marginBottom: "1rem", fontSize: "1.7rem" }}>
               Course Overview
             </h2>
@@ -278,8 +345,7 @@ export default function CoursePage() {
                       width: 42,
                       height: 42,
                       borderRadius: 12,
-                      background:
-                        "linear-gradient(135deg,#4f46e5,#7c3aed)",
+                      background: "linear-gradient(135deg,#4f46e5,#7c3aed)",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",

@@ -3,6 +3,7 @@ const razorpay = require("../utils/razorpay.js");
 
 const Course = require("../models/Course.model.js");
 const EnrolledUsers = require("../models/EnrolledUser.model.js");
+const Payment = require("../models/Payment.model.js");
 
 const createOrder = async(userId, courseId) =>{
     const course = await Course.findById(courseId);
@@ -22,10 +23,16 @@ const createOrder = async(userId, courseId) =>{
     }
     
     // coverting ₹ - paise
-    const amount = course.price * 100;
+    const amount = course.price;
 
+    if(!amount || amount <= 0){
+        throw new Error("Invalid Course Amount!");
+    }
+
+    const amountInPaise = Math.round(amount * 100);
+    
     const order = await razorpay.orders.create({
-        amount, 
+        amount: amountInPaise, 
         currency: "INR",
         receipt: `course_${course._id}_${Date.now()}`,
         notes: {
@@ -33,11 +40,26 @@ const createOrder = async(userId, courseId) =>{
             userId: userId.toString(),
             courseName: course.title
         }
-    })
+    });
+    console.log(order);
+
+    const payment = await Payment.create({
+        userId,
+        courseId,
+        razorpayOrderId: order.id,
+        amount: amountInPaise,
+        currency: "INR",
+        status: "created"
+    });
 
     return {
         success: true,
-        order,
+        order: {
+            id: order.id,
+            amount: order.amount,
+            currency: order.currency
+        },
+        paymentId: payment._id,
         course: {
             _id: course._id,
             title: course.title,
@@ -48,50 +70,83 @@ const createOrder = async(userId, courseId) =>{
 };
 
 const verifyPayment = async(userId, courseId, razorpay_order_id, razorpay_payment_id, razorpay_signature) =>{
-    const course = await Course.findById(courseId);
-
-    if(!course){
-        throw new Error("Course Not Found!");
+    if(!razorpay_order_id || !razorpay_payment_id || !razorpay_signature){
+        throw new Error("Incomplete Razorpay Payment Details");
     }
 
-    const generateSignature = crypto.createHmac(
-        "sha256",
-        process.env.RAZORPAY_KEY_SECRET
-    ).update(`${razorpay_order_id} | ${razorpay_payment_id}`).digest("hex");
+    const payment = await Payment.findOne({
+        razorpayOrderId: razorpay_order_id,
+        userId,
+        courseId
+    });
 
-    if(generateSignature !== razorpay_signature){
-        throw new Error("Payment Verification Failed!");
+    if(!payment){
+        throw new Error("Payment Order Not Found");
     }
+    
+    const generateSignature = crypto.createHmac("sha256", process.env.RAZORPAY_KEY_SECRET).update(`${razorpay_order_id}|${razorpay_payment_id}`).digest("hex");
+
+    const signatureMatch = crypto.timingSafeEqual(
+        Buffer.from(generateSignature),
+        Buffer.from(razorpay_signature)
+    );
+
+    if(!signatureMatch){
+        throw new Error("Payment Verification Failed");
+    }
+
+    if(payment.status === "paid"){
+        const exisitngEnrollment = await EnrolledUsers.findOne({
+            userId, 
+            courseId, 
+            status: "active"
+        })
+
+        return {
+            success: true,
+            message: "Payment Already Verified",
+            enrollment: exisitngEnrollment
+        }
+    }
+
+    payment.razorpayPaymentId = razorpay_payment_id;
+    payment.razropaySignature = razorpay_signature;
+
+    payment.status = "paid"
+
+    await payment.save();
 
     const alreadyEnrolled = await EnrolledUsers.findOne({
         userId, 
-        courseId,
-        status: "active"
-    })
+        courseId
+    });
 
     if(alreadyEnrolled){
+        if(alreadyEnrolled.status !== "active"){
+            alreadyEnrolled.status = "active";
+            await alreadyEnrolled.save();
+        }
+
         return {
             success: true,
-            message: "Already Enrolled",
-            enrolled: alreadyEnrolled
-        }
+            message: "Payment Verified! Course Access Restored!",
+            enrollment: alreadyEnrolled
+        };
     }
 
     const enrollment = await EnrolledUsers.create({
         userId,
         courseId,
         status: "active"
-    })
+    });
 
     return {
         success: true,
-        message: "Payment Verified Successfully! Enrollment Completed....",
+        message: "Payment Verified Successfully! \nEnrollment Completed!",
         enrollment
-    };
+    }
+
 };
 
 
-
 module.exports = {createOrder, verifyPayment};
-
-
